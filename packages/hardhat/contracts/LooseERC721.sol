@@ -18,7 +18,7 @@ contract LooseERC721 is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         transferOwnership(owner);
     }
 
-    // mint to controller
+    // mint
     function safeMint(uint256 tokenId, string memory tokenUri, address to) public onlyOwner {
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, tokenUri);

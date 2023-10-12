@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-import "./TradeController.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
@@ -30,6 +29,9 @@ contract TwinERC721 is
     mapping(bytes => bool) internal _signatureUsed;
     address phygitalTradeControllerAddress;
     address looslyCoupledNFTCollectionAddress;
+    uint256 internal _withdrawableAmount;
+    mapping(uint256 => address payable) internal lastTokenSeller;
+    mapping(address => uint256) internal lastTokenSalesProceeds;
     address internal _forwarder;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -67,43 +69,30 @@ contract TwinERC721 is
         looslyCoupledNFTCollectionAddress = _looslyCoupledNFTCollectionAddress;
     }
 
-    // to be triggered by the SELLER
-    function createProxyForPhygitalTrade(
-        bytes32 randomValueHash,
+    // to be triggered by the SELLER of a phygital item
+    function offerItem(
+        bytes32 hashedMsg,
         bytes32 r,
         bytes32 s,
         uint8 v
-    ) public returns (address) {
+    ) external {
         require(looslyCoupledNFTCollectionAddress != address(0), "no SALES NFT contract deployed");
+        uint256 _tokenId = transformAddress(getSigner(hashedMsg, r, s, v));
 
-        // create trade controller
-        bytes32 _salt = keccak256(abi.encodePacked(_msgSender(), block.number));
-        address newControllerAddress = address(new TradeController{salt: _salt}(
-            0xd7f42354e6B8cc6DD78EFBEDcd928EB9eEe246b0,
-            _forwarder,
-            looslyCoupledNFTCollectionAddress,
-            address(this)
-        ));
+        // lock up the tightly-coupled NFT
+        _transfer(_msgSender(), address(this), _tokenId);
 
-        // mint the SALES NFT to the trade controller
-        bytes memory _signature = abi.encodePacked(v, r, s);
-        require(!_signatureUsed[_signature], "Signature already used.");
-        uint256 _tokenId = transformAddress(getSigner(randomValueHash, r, s, v));
+        // mint the SALES NFT to proxy EOA wallet
         (bool mintSuccess, ) = looslyCoupledNFTCollectionAddress.call(
             abi.encodeWithSignature(
                 "safeMint(uint256,string,address)", 
                 _tokenId, 
                 tokenURI(_tokenId),
-                newControllerAddress
+                _msgSender()
             )
         );
         require(mintSuccess, "minting Sales NFT failed");
-
-        // approve the trade controller to take control of the TWIN NFT
-        approve(newControllerAddress, _tokenId);  
         //TEST _signatureUsed[_signature] = true;    
-
-        return newControllerAddress; 
     }
 
     // to be triggered by the BUYER
@@ -127,7 +116,18 @@ contract TwinERC721 is
         require(burnSuccess, "burning Sales NFT failed");
 
         // transfer the TWIN NFT to the caller
-        _transfer(ownerOf(_tokenId), _msgSender(), _tokenId);
+        _transfer(address(this), _msgSender(), _tokenId);
+
+        uint256 _toSeller = lastTokenSalesProceeds[_msgSender()] / 100 * 95;
+
+        // send money to the seller
+        lastTokenSeller[_tokenId].transfer(_toSeller);
+
+        // TODO: send money to the creator
+
+        // keep the rest as fees
+        _withdrawableAmount += lastTokenSalesProceeds[_msgSender()] - _toSeller;
+
         //TEST _signatureUsed[_signature] = true;
     }
 
@@ -324,6 +324,25 @@ contract TwinERC721 is
         return super.supportsInterface(interfaceId);
     }
 
+    function onERC721Received(address, address, uint256, bytes calldata) external pure returns (bytes4) {
+        return IERC721ReceiverUpgradeable.onERC721Received.selector;
+    }
+
     // OpenSea compatibility
     event TokenLocked(uint256 indexed tokenId, address indexed approvedContract);
+
+    receive() external payable {
+        // store the buyer and the amount of money received by the web3 marketplace
+        lastTokenSalesProceeds[msg.sender] += msg.value;
+    }
+
+    function withdrawFees(address _to) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(_withdrawableAmount > 0, "No more funds to withdraw");
+        payable(_msgSender()).transfer(_withdrawableAmount);
+        (bool success, ) = payable(_to).call{
+            value: (_withdrawableAmount)
+        }("");
+        require(success, "Failed to withdraw funds!");
+        _withdrawableAmount = 0;
+    }
 }
