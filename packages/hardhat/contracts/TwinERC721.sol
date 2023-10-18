@@ -71,24 +71,26 @@ contract TwinERC721 is
 
     // to be triggered by the SELLER of a phygital item
     function offerItem(
-        bytes32 hashedMsg,
-        bytes32 r,
-        bytes32 s,
-        uint8 v
+        uint256 tokenId
+        // bytes32 hashedMsg,
+        // bytes32 r,
+        // bytes32 s,
+        // uint8 v
     ) external {
         require(looslyCoupledNFTCollectionAddress != address(0), "no SALES NFT contract deployed");
-        uint256 _tokenId = transformAddress(getSigner(hashedMsg, r, s, v));
+        //uint256 _tokenId = transformAddress(getSigner(hashedMsg, r, s, v));
 
         // lock up the tightly-coupled NFT
-        _transfer(_msgSender(), address(this), _tokenId);
+        _transfer(_msgSender(), address(this), tokenId);
 
         // mint the SALES NFT to proxy EOA wallet
         (bool mintSuccess, ) = looslyCoupledNFTCollectionAddress.call(
             abi.encodeWithSignature(
                 "safeMint(uint256,string,address)", 
-                _tokenId, 
-                tokenURI(_tokenId),
-                _msgSender()
+                tokenId, 
+                tokenURI(tokenId),
+                0xd7f42354e6B8cc6DD78EFBEDcd928EB9eEe246b0
+                // _msgSender()
             )
         );
         require(mintSuccess, "minting Sales NFT failed");
@@ -109,7 +111,7 @@ contract TwinERC721 is
         (bool burnSuccess, ) = 
         looslyCoupledNFTCollectionAddress.call(
             abi.encodeWithSignature(
-                "burn(unit256)", 
+                "burn(uint256)", 
                 _tokenId
             )
         );
