@@ -18,7 +18,8 @@ const NFTCard = ({ nft }: PageProps) => {
     }, [])
 
 
-    const { writeAsync: offerItem, isLoading: isLoadingOfferItem, isMining: isMiningOfferItem } = useScaffoldContractWrite({
+    // const { writeAsync: offerItem, isLoading: isLoadingOfferItem, isMining: isMiningOfferItem } = useScaffoldContractWrite({
+    const { writeAsync: offerItem, } = useScaffoldContractWrite({
         contractName: "TwinERC721",
         functionName: "offerItem",
         args: [BigInt(nft.tokenId)],
@@ -31,7 +32,8 @@ const NFTCard = ({ nft }: PageProps) => {
         },
   });
 
-  const { writeAsync: claimTwin, isLoading: isLoadingClaimTwin, isMining: isMiningClaimTwin } = useScaffoldContractWrite({
+  // const { writeAsync: claimTwin, isLoading: isLoadingClaimTwin, isMining: isMiningClaimTwin } = useScaffoldContractWrite({
+  const { writeAsync: claimTwin, } = useScaffoldContractWrite({
     contractName: "TwinERC721",
     functionName: "swapSalesNftToTwinNft",
     args: [BigInt(nft.tokenId)],

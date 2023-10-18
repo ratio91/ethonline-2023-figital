@@ -1,13 +1,5 @@
-import Link from "next/link";
-import { useState } from 'react';
-import type { NextPage } from "next";
-import { GetServerSideProps } from "next";
-import { BugAntIcon, MagnifyingGlassIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { MetaHeader } from "~~/components/MetaHeader";
 import NftList from "~~/components/NftList"
-import { useScaffoldContractWrite } from "~~/hooks/scaffold-eth/useScaffoldContractWrite";
-import { keccak256 } from "@ethersproject/keccak256";
-const { Utils } = require("alchemy-sdk");
 
 const Home = ({ address }: PageProps) => {
 

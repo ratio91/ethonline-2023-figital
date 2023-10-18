@@ -1,8 +1,6 @@
 import React from 'react';
 import { useFetchNfts } from '~~/hooks/customHooks/useFetchNfts'; // import your custom Hook
 import { useGetOwnersForNfts } from '~~/hooks/customHooks/useGetOwnersForNfts'; // import your custom Hook
-import {  } from "@rainbow-me/rainbowkit";
-import { useScaffoldContractRead } from '~~/hooks/scaffold-eth/useScaffoldContractRead';
 import NftCard from './NftCard';
 
 export default function NftList(props: any) {
@@ -28,9 +26,4 @@ export default function NftList(props: any) {
   );
   
   
-}
-
-
-interface OwnerData {
-  [key: string]: any; // use any or a more specific type for the values
 }
