@@ -88,5 +88,5 @@ export const Header = ({ setAddress }: PageProps) => {
 
 
 type PageProps = {
-  setAddress: Dispatch<SetStateAction<string>>;
+  setAddress: Dispatch<SetStateAction<string|undefined>>;
 };
