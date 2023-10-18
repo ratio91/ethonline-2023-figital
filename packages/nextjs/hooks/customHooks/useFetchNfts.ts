@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import { NftContractNftsResponse } from "alchemy-sdk";
 import { alchemy } from "~~/utils/alchemyClient";
 
 export const useFetchNfts = (contractAddress: string) => {
-  const [nfts, setNfts] = useState<getNftsForContractResponse>({ nfts: [], pageKey: null });
+  const [nfts, setNfts] = useState<NftContractNftsResponse>({ nfts: [], pageKey: undefined });
 
   useEffect(() => {
     const fetchNfts = async () => {
@@ -16,8 +17,3 @@ export const useFetchNfts = (contractAddress: string) => {
   console.log(nfts);
   return nfts.nfts;
 };
-
-interface getNftsForContractResponse {
-  nfts: [];
-  pageKey: any;
-}

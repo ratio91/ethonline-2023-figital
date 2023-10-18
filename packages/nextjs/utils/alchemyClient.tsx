@@ -1,4 +1,4 @@
-const { Alchemy, Network } = require("alchemy-sdk");
+import { Alchemy, Network } from "alchemy-sdk";
 
 // Configures the Alchemy SDK
 const config = {

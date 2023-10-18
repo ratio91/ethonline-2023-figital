@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
-import NFT from "~~/types/customTypes/nft";
+import { Nft } from "alchemy-sdk";
 import { alchemy } from "~~/utils/alchemyClient";
 
 // define the hook with the signature
-export const useGetOwnersForNfts = (contractAddress: string, nfts: NFT[]) => {
+export const useGetOwnersForNfts = (contractAddress: string, nfts: Nft[]) => {
   // use useState to store the owners data
-  const [owners, setOwners] = useState<Record<string, NFT[]>>({});
+  const [owners, setOwners] = useState<Record<string, Nft[]>>({});
 
   // use useEffect to fetch the owners data for each tokenId
   useEffect(() => {
     // create an async function to fetch the data
     async function fetchOwners() {
       // create an object to store the owners data
-      const ownerData: Record<string, NFT[]> = {};
+      const ownerData: Record<string, Nft[]> = {};
       // loop through the tokenIds array
-      for (let nft of nfts) {
+      for (const nft of nfts) {
         // use alchemy.nft.getOwnersForNft to get the owner of each tokenId
         const data = await alchemy.nft.getOwnersForNft(contractAddress, BigInt(nft.tokenId));
         const owner = data.owners[0];

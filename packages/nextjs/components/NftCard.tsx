@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { Nft } from "alchemy-sdk";
 import { useScaffoldContractWrite } from "~~/hooks/scaffold-eth/useScaffoldContractWrite";
-import NFT from "~~/types/customTypes/nft";
 
 // Define a functional component called NFTCard
 // It takes a prop called nft, which is an object containing the NFT data
@@ -80,5 +80,5 @@ const NFTCard = ({ nft }: PageProps) => {
 export default NFTCard;
 
 type PageProps = {
-  nft: NFT;
+  nft: Nft;
 };
