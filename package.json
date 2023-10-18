@@ -1,7 +1,6 @@
 {
   "name": "figitalism",
   "version": "0.0.1",
-  "private": false,
   "workspaces": {
     "packages": [
       "packages/hardhat",
@@ -21,6 +20,7 @@
     "hardhat:test": "yarn workspace @se-2/hardhat test",
     "test": "yarn hardhat:test",
     "start": "yarn workspace @se-2/nextjs dev",
+    "dev": "next packages/nextjs dev",
     "next:lint": "yarn workspace @se-2/nextjs lint",
     "next:format": "yarn workspace @se-2/nextjs format",
     "next:check-types": "yarn workspace @se-2/nextjs check-types",
@@ -36,5 +36,11 @@
   },
   "resolutions": {
     "usehooks-ts@^2.7.2": "patch:usehooks-ts@npm:^2.7.2#./.yarn/patches/usehooks-ts-npm-2.7.2-fceffe0e43.patch"
+  },
+  "dependencies": {
+    "alchemy-sdk": "^2.10.1",
+    "ethers": "^5.7.2",
+    "vercel": "latest",
+    "wagmi": "^1.4.4"
   }
 }

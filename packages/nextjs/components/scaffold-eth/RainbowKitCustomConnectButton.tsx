@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { QRCodeSVG } from "qrcode.react";
 import CopyToClipboard from "react-copy-to-clipboard";
@@ -19,7 +19,7 @@ import { getBlockExplorerAddressLink, getTargetNetwork } from "~~/utils/scaffold
 /**
  * Custom Wagmi Connect Button (watch balance + custom design)
  */
-export const RainbowKitCustomConnectButton = () => {
+export const RainbowKitCustomConnectButton = ({ setAddress }: PageProps) => {
   useAutoConnect();
   const networkColor = useNetworkColor();
   const configuredNetwork = getTargetNetwork();
@@ -30,6 +30,7 @@ export const RainbowKitCustomConnectButton = () => {
   return (
     <ConnectButton.Custom>
       {({ account, chain, openConnectModal, mounted }) => {
+        setAddress(account?.address.toLocaleLowerCase());
         const connected = mounted && account && chain;
         const blockExplorerAddressLink = account
           ? getBlockExplorerAddressLink(getTargetNetwork(), account.address)
@@ -192,4 +193,8 @@ export const RainbowKitCustomConnectButton = () => {
       }}
     </ConnectButton.Custom>
   );
+};
+
+type PageProps = {
+  setAddress: Dispatch<SetStateAction<string | undefined>>;
 };
