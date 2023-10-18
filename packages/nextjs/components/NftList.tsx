@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React from 'react';
 import { useFetchNfts } from '~~/hooks/customHooks/useFetchNfts'; // import your custom Hook
 import { useGetOwnersForNfts } from '~~/hooks/customHooks/useGetOwnersForNfts'; // import your custom Hook
 import {  } from "@rainbow-me/rainbowkit";

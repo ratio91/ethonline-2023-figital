@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -88,5 +88,5 @@ export const Header = ({ setAddress }: PageProps) => {
 
 
 type PageProps = {
-  setAddress: Function;
+  setAddress: Dispatch<SetStateAction<string>>;
 };

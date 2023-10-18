@@ -6,10 +6,8 @@ import NFT from '~~/types/customTypes/nft';
 // It takes a prop called nft, which is an object containing the NFT data
 const NFTCard = ({ nft }: PageProps) => {
 
-    //usestate for button text
     const [buttonText, setButtonText] = useState("");
 
-    //use effect template
     useEffect(() => {
     if(nft.contract.address == '0x99a0EEBe6D5Abd437485B2c61522A0E5770fc681'.toLowerCase()){
         setButtonText("Sell on OpenSea")
@@ -17,13 +15,25 @@ const NFTCard = ({ nft }: PageProps) => {
     else if(nft.contract.address == '0xffd2c3434b9fdf28051ff79869bbbace646638d8'.toLowerCase()) {
         setButtonText("Claim Twin NFT")
     }
-        
     }, [])
 
 
-const { writeAsync, isLoading, isMining } = useScaffoldContractWrite({
+    const { writeAsync: offerItem, isLoading: isLoadingOfferItem, isMining: isMiningOfferItem } = useScaffoldContractWrite({
+        contractName: "TwinERC721",
+        functionName: "offerItem",
+        args: [BigInt(nft.tokenId)],
+        // The number of block confirmations to wait for before considering transaction to be confirmed (default : 1).
+        blockConfirmations: 1,
+        // The callback function to execute when the transaction is confirmed.
+        onBlockConfirmation: (txnReceipt: any) => {
+        //TODO: trigger user feedback
+        console.log("Transaction blockHash", txnReceipt.blockHash);
+        },
+  });
+
+  const { writeAsync: claimTwin, isLoading: isLoadingClaimTwin, isMining: isMiningClaimTwin } = useScaffoldContractWrite({
     contractName: "TwinERC721",
-    functionName: "offerItem",
+    functionName: "swapSalesNftToTwinNft",
     args: [BigInt(nft.tokenId)],
     // The number of block confirmations to wait for before considering transaction to be confirmed (default : 1).
     blockConfirmations: 1,
@@ -32,8 +42,7 @@ const { writeAsync, isLoading, isMining } = useScaffoldContractWrite({
       //TODO: trigger user feedback
       console.log("Transaction blockHash", txnReceipt.blockHash);
     },
-    
-  });
+    });
     return (
       <div className="w-48 h-full rounded-xl overflow-hidden shadow-lg bg-teal-800 text-center">
         <img
@@ -46,7 +55,11 @@ const { writeAsync, isLoading, isMining } = useScaffoldContractWrite({
           <div className="flex justify-center">
             <button
                 onClick={() => {
-                writeAsync();
+                    if (nft.contract.address == '0x99a0EEBe6D5Abd437485B2c61522A0E5770fc681'.toLowerCase()){
+                        offerItem();
+                    }else{
+                        claimTwin();
+                    }
                 }}
                 className="flex flex-col items-center mb-1.5"
             >
