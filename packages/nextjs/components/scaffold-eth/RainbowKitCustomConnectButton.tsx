@@ -196,5 +196,5 @@ export const RainbowKitCustomConnectButton = ({ setAddress }: PageProps) => {
 };
 
 type PageProps = {
-  setAddress: Dispatch<SetStateAction<string|undefined>>;
+  setAddress: Dispatch<SetStateAction<string | undefined>>;
 };

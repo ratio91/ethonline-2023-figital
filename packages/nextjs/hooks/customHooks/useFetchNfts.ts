@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
-import { alchemy } from '~~/utils/alchemyClient';
+import { useEffect, useState } from "react";
+import { alchemy } from "~~/utils/alchemyClient";
 
 export const useFetchNfts = (contractAddress: string) => {
-  
-  const [nfts, setNfts] = useState<getNftsForContractResponse>({nfts: [], pageKey: null});
+  const [nfts, setNfts] = useState<getNftsForContractResponse>({ nfts: [], pageKey: null });
 
   useEffect(() => {
     const fetchNfts = async () => {
@@ -13,7 +12,7 @@ export const useFetchNfts = (contractAddress: string) => {
 
     fetchNfts();
   }, [contractAddress]);
-  console.log('NFTS');
+  console.log("NFTS");
   console.log(nfts);
   return nfts.nfts;
 };

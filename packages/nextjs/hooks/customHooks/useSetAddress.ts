@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 export const useSetAddress = () => {
-    const [address, setAddress] = useState('');
-    return { address, setAddress };
-}
+  const [address, setAddress] = useState("");
+  return { address, setAddress };
+};

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { alchemy } from '~~/utils/alchemyClient';
-import NFT from '~~/types/customTypes/nft';
+import { useEffect, useState } from "react";
+import NFT from "~~/types/customTypes/nft";
+import { alchemy } from "~~/utils/alchemyClient";
 
 // define the hook with the signature
 export const useGetOwnersForNfts = (contractAddress: string, nfts: NFT[]) => {
@@ -19,8 +19,8 @@ export const useGetOwnersForNfts = (contractAddress: string, nfts: NFT[]) => {
         const data = await alchemy.nft.getOwnersForNft(contractAddress, BigInt(nft.tokenId));
         const owner = data.owners[0];
         // check if the ownerData object already has the owner as a key
-        console.log('ONE OWNER')
-        console.log(owner)
+        console.log("ONE OWNER");
+        console.log(owner);
         if (ownerData[owner]) {
           // if it does, push the tokenId to the array
           ownerData[owner].push(nft);
@@ -35,8 +35,8 @@ export const useGetOwnersForNfts = (contractAddress: string, nfts: NFT[]) => {
     // invoke the async function
     fetchOwners();
   }, [contractAddress, nfts]); // use contractAddress and tokenIds as dependencies
-  console.log('OWNERS');
-  console.log(owners)
+  console.log("OWNERS");
+  console.log(owners);
   // return the owners state from the hook
   return owners;
 };
