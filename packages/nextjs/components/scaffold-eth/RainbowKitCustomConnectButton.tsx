@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { QRCodeSVG } from "qrcode.react";
 import CopyToClipboard from "react-copy-to-clipboard";
@@ -196,5 +196,5 @@ export const RainbowKitCustomConnectButton = ({ setAddress }: PageProps) => {
 };
 
 type PageProps = {
-  setAddress: Function;
+  setAddress: Dispatch<SetStateAction<string|undefined>>;
 };
