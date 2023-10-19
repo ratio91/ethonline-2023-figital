@@ -33,6 +33,7 @@ contract TwinERC721 is
     mapping(uint256 => address payable) internal lastTokenSeller;
     mapping(address => uint256) internal lastTokenSalesProceeds;
     address internal _forwarder;
+    mapping(uint256 => uint256) internal lastTokenSalesProceedsAmount;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor(address forwarder)
@@ -42,7 +43,7 @@ contract TwinERC721 is
     }
 
     function initialize() public initializer {
-        __ERC721_init("PT Test Collection", "TEST");
+        __ERC721_init("FIGITALISM Hackathon Collection", "FIGITALISM");
         __ERC721URIStorage_init();
         __Pausable_init();
         __AccessControl_init();
@@ -54,7 +55,7 @@ contract TwinERC721 is
         _grantRole(PAUSER_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
-        registryAddress = address(0xE587fb76509550a72Eb120b941F9235488aB6AEe); //the proxy address
+        registryAddress = address(0x4dD835afC9E02382e98700eC2fa5317aeE1f321d); //the proxy address
     }
 
     function getLooslyCoupledNFTCollectionAddress() public view returns (address) {
@@ -89,46 +90,48 @@ contract TwinERC721 is
                 "safeMint(uint256,string,address)", 
                 tokenId, 
                 tokenURI(tokenId),
-                0xd7f42354e6B8cc6DD78EFBEDcd928EB9eEe246b0
-                // _msgSender()
+                0xd7f42354e6B8cc6DD78EFBEDcd928EB9eEe246b0 // _msgSender()
             )
         );
         require(mintSuccess, "minting Sales NFT failed");
         //TEST _signatureUsed[_signature] = true;    
+        lastTokenSeller[tokenId] = payable(_msgSender());
     }
 
     // to be triggered by the BUYER
     function swapSalesNftToTwinNft(
-        bytes32 randomValueHash,
-        bytes32 r,
-        bytes32 s,
-        uint8 v
+        uint256 tokenId
+        // bytes32 hashedMsg,
+        // bytes32 r,
+        // bytes32 s,
+        // uint8 v
     ) public {
         // burn the sales NFT
-        bytes memory _signature = abi.encodePacked(v, r, s);
-        require(!_signatureUsed[_signature], "Signature already used.");
-        uint256 _tokenId = transformAddress(getSigner(randomValueHash, r, s, v));
-        (bool burnSuccess, ) = 
-        looslyCoupledNFTCollectionAddress.call(
-            abi.encodeWithSignature(
-                "burn(uint256)", 
-                _tokenId
-            )
+        //bytes memory _signature = abi.encodePacked(v, r, s);
+        //require(!_signatureUsed[_signature], "Signature already used.");
+        //uint256 _tokenId = transformAddress(getSigner(randomValueHash, r, s, v));
+        require(
+            ERC721Upgradeable(looslyCoupledNFTCollectionAddress).isApprovedForAll(
+                _msgSender(),
+                address(this)
+            ) == true, 
+            "no permission to burn"
         );
-        require(burnSuccess, "burning Sales NFT failed");
+        ERC721BurnableUpgradeable(looslyCoupledNFTCollectionAddress).burn(tokenId);
+        //require(burnSuccess, "handing over Sales NFT failed");
 
         // transfer the TWIN NFT to the caller
-        _transfer(address(this), _msgSender(), _tokenId);
+        _transfer(address(this), _msgSender(), tokenId);
 
-        uint256 _toSeller = lastTokenSalesProceeds[_msgSender()] / 100 * 95;
+        uint256 _amountToSeller = lastTokenSalesProceedsAmount[tokenId] / 100 * 95;
 
         // send money to the seller
-        lastTokenSeller[_tokenId].transfer(_toSeller);
+        lastTokenSeller[tokenId].transfer(_amountToSeller);
 
         // TODO: send money to the creator
 
         // keep the rest as fees
-        _withdrawableAmount += lastTokenSalesProceeds[_msgSender()] - _toSeller;
+        _withdrawableAmount += lastTokenSalesProceedsAmount[tokenId] - _amountToSeller;
 
         //TEST _signatureUsed[_signature] = true;
     }
@@ -152,7 +155,6 @@ contract TwinERC721 is
         );
         require(success, "entry to token registry failed");
         //TEST _signatureUsed[_signature] = true;
-        emit MetadataUpdate(_tokenId);
         emit TokenLocked(_tokenId, owner());
     }
 
@@ -211,12 +213,12 @@ contract TwinERC721 is
     }
 
     /// disable transfer without chip signature
-    function transferFrom(address,address,uint256) public pure override(IERC721Upgradeable, ERC721Upgradeable) {
+    function transferFrom(address,address,uint256) public pure override(ERC721Upgradeable, IERC721Upgradeable) {
         revert("not allowed");
     }
 
     /// disable transfer without chip signature
-    function safeTransferFrom(address,address,uint256) public pure override(IERC721Upgradeable, ERC721Upgradeable) {
+    function safeTransferFrom(address,address,uint256) public pure override(ERC721Upgradeable, IERC721Upgradeable) {
         revert("not allowed");
     }
 
@@ -224,7 +226,7 @@ contract TwinERC721 is
     function approve(
         address to,
         uint256 tokenId
-    ) public override(IERC721Upgradeable, ERC721Upgradeable) {
+    ) public override(ERC721Upgradeable, IERC721Upgradeable) {
         require(to != transformToken(tokenId), "approval of chip not allowed");
         super.approve(to, tokenId);
     }
@@ -232,7 +234,7 @@ contract TwinERC721 is
     // disable outride approval for all
     function setApprovalForAll(
         address, bool
-    ) public pure override(IERC721Upgradeable, ERC721Upgradeable) {
+    ) public pure override(ERC721Upgradeable, IERC721Upgradeable) {
         revert("not allowed");
     }
 
@@ -320,7 +322,7 @@ contract TwinERC721 is
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(AccessControlUpgradeable, ERC721URIStorageUpgradeable, ERC721Upgradeable)
+        override(AccessControlUpgradeable, ERC721Upgradeable, ERC721URIStorageUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -333,9 +335,17 @@ contract TwinERC721 is
     // OpenSea compatibility
     event TokenLocked(uint256 indexed tokenId, address indexed approvedContract);
 
+    event BurnAttempt(uint256 indexed tokenId, address msg_sender, address _msgSender);
+
     receive() external payable {
-        // store the buyer and the amount of money received by the web3 marketplace
-        lastTokenSalesProceeds[msg.sender] += msg.value;
+        // fallback
+    }
+
+    // hand over proceeds from sales to the contract
+    function receiveSalesProceeds(
+        uint256 tokenId
+    ) external payable onlyRole(DEFAULT_ADMIN_ROLE) {
+        lastTokenSalesProceedsAmount[tokenId] += msg.value;
     }
 
     function withdrawFees(address _to) external onlyRole(DEFAULT_ADMIN_ROLE) {
