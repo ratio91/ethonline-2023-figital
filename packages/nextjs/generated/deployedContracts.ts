@@ -5,7 +5,7 @@ const contracts = {
       name: "Polygon",
       contracts: {
         LooseERC721: {
-          address: "0xFfD2c3434b9FdF28051ff79869BbBACE646638d8",
+          address: "0x540A1f4B199D7677395ABFd553443540249eC402",
           abi: [
             {
               inputs: [

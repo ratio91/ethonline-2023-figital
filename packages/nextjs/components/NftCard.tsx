@@ -11,7 +11,7 @@ const NFTCard = ({ nft }: PageProps) => {
   useEffect(() => {
     if (nft.contract.address == "0x99a0EEBe6D5Abd437485B2c61522A0E5770fc681".toLowerCase()) {
       setButtonText("Sell on OpenSea");
-    } else if (nft.contract.address == "0xffd2c3434b9fdf28051ff79869bbbace646638d8".toLowerCase()) {
+    } else if (nft.contract.address == "0x540A1f4B199D7677395ABFd553443540249eC402".toLowerCase()) {
       setButtonText("Claim Twin NFT");
     }
   }, []);
@@ -25,7 +25,6 @@ const NFTCard = ({ nft }: PageProps) => {
     blockConfirmations: 1,
     // The callback function to execute when the transaction is confirmed.
     onBlockConfirmation: (txnReceipt: any) => {
-      //TODO: trigger user feedback
       console.log("Transaction blockHash", txnReceipt.blockHash);
     },
   });
@@ -39,7 +38,19 @@ const NFTCard = ({ nft }: PageProps) => {
     blockConfirmations: 1,
     // The callback function to execute when the transaction is confirmed.
     onBlockConfirmation: (txnReceipt: any) => {
-      //TODO: trigger user feedback
+      console.log("Transaction blockHash", txnReceipt.blockHash);
+    },
+  });
+
+  const { writeAsync: approveAll } = useScaffoldContractWrite({
+    contractName: "LooseERC721",
+    functionName: "setApprovalForAll",
+    args: ["0x99a0EEBe6D5Abd437485B2c61522A0E5770fc681", true],
+    // The number of block confirmations to wait for before considering transaction to be confirmed (default : 1).
+    blockConfirmations: 1,
+    // The callback function to execute when the transaction is confirmed.
+    onBlockConfirmation: (txnReceipt: any) => {
+      claimTwin();
       console.log("Transaction blockHash", txnReceipt.blockHash);
     },
   });
@@ -58,7 +69,7 @@ const NFTCard = ({ nft }: PageProps) => {
               setIsLoading(false);
             } else {
               setIsLoading(true);
-              await claimTwin();
+              await approveAll();
               setIsLoading(false);
             }
           }}

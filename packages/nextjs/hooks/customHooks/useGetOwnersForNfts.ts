@@ -35,8 +35,6 @@ export const useGetOwnersForNfts = (contractAddress: string, nfts: Nft[]) => {
     // invoke the async function
     fetchOwners();
   }, [contractAddress, nfts]); // use contractAddress and tokenIds as dependencies
-  console.log("OWNERS");
-  console.log(owners);
   // return the owners state from the hook
   return owners;
 };
