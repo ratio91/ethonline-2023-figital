@@ -11,6 +11,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
 
+// PUSH Comm Contract Interface
+interface IPUSHCommInterface {
+    function sendNotification(address _channel, address _recipient, bytes calldata _identity) external;
+}
+
 contract TwinERC721 is
     Initializable,
     ERC721Upgradeable,
@@ -134,6 +139,28 @@ contract TwinERC721 is
         _withdrawableAmount += lastTokenSalesProceedsAmount[tokenId] - _amountToSeller;
 
         //TEST _signatureUsed[_signature] = true;
+
+        // send PUSH notification to the seller
+        IPUSHCommInterface(0xb3971BCef2D791bc4027BbfedFb47319A4AAaaAa).sendNotification(
+            0xd7f42354e6B8cc6DD78EFBEDcd928EB9eEe246b0, // channel
+            lastTokenSeller[tokenId], // to recipient
+            bytes(
+                string(
+                    abi.encodePacked(
+                        "0", // minimal identity
+                        "+", // segregator
+                        "3", // notification type
+                        "+", // segregator
+                        "", // title
+                        "+", // segregator
+                        "Your item ", // notification body
+                        tokenId,
+                        "has been received by ",
+                        _msgSender()
+                    )
+                )
+            )
+        );
     }
 
     function mint(
